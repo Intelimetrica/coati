@@ -5,6 +5,7 @@ of traversing and working with a project.
 import os
 import imp
 import codecs
+import logging
 from copy import deepcopy
 from coati import excel, merge, powerpoint
 from coati.resources import factory
@@ -58,6 +59,7 @@ class SlideBuilder(object):
         config = self._attemptload(fname)
         if not config or not config.slides or type(config.slides) is not list:
             self.slidesdata = []
+            logging.warning("config file no valid")
             return None
         self.slidesdata = flatten(config.slides)
         return config
