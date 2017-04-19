@@ -60,6 +60,17 @@ class Label(object):
         ppt_label = utils.grab_shape(slide, self.name)
         utils.replace_text(ppt_label, self.content)
 
+class Picture(object):
+
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path
+
+    def merge(self, slide):
+        width, height = (1, 1)
+        picture = slide.Shapes.AddPicture(self.path, 1, 1, width, height)
+        placeholder = utils.grab_shape(slide, self.name)
+        utils.transfer_properties(placeholder, picture)
 
 def factory(resources, sheet):
     objs = []
