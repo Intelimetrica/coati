@@ -120,10 +120,8 @@ class SlideBuilder(object):
             merge.resources(slide, objs)
 
     def build(self):
-        tslides = self._pptx.Slides()
-
         for number, params in self.slidesdata:
-            slide = tslides.Item(number)
+            slide = self._pptx.Slides(number)
             self.process_slide(slide, params)
 
     def process_slide(self, slide, params):

@@ -3,9 +3,9 @@ the application executable."""
 import argparse
 import os
 from tempfile import mkstemp
-from officereports.powerpoint import SlideshowJoiner, SlideSourceOrdering
-from officereports.builder import SlideBuilder
-from officereports.errors import CLIException
+from coati.powerpoint import SlideshowJoiner, SlideSourceOrdering
+from coati.builder import SlideBuilder
+from coati.errors import CLIException
 
 
 def createparser():
@@ -22,8 +22,6 @@ def createparser():
     build_parser.set_defaults(func=build)
     build_parser.add_argument('-d', '--dir', default=os.getcwd(),
                               help='The directory where the project lives')
-    build_parser.add_argument('-s', '--single',
-                              help='Build a single slide specifying its name')
     build_parser.add_argument('-t', '--temporal', action='store_true',
                               help='Output to a temporal file')
     build_parser.add_argument('-o', '--output', default=os.path.abspath('out.pptx'),
@@ -79,21 +77,10 @@ def singleslide(args):
 
 
 def build(args):
-    if args.single:
-        singleslide(args)
-        return
-
-    paths = slidepaths(args.dir)
-    builders = [SlideBuilder(path) for path in paths]
-
-    joiner = SlideshowJoiner(builders)
-    joiner.build()
-    joiner.save(destinationpath(args))
-
-    close_excel(builders[0])
-
-    if args.close:
-        joiner.quit()
+    builder = SlideBuilder(args.template)
+    builder.loadtemplate()
+    builder.loadconfig('./config.py')
+    builder.build()
 
 
 def test(args):
