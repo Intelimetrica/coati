@@ -1,7 +1,7 @@
 from coati.win32 import copy, execute_commandbar
 from coati import utils, excel, powerpoint
 import time
-
+import logging
 
 class Chart(object):
 
@@ -72,18 +72,35 @@ class Picture(object):
         placeholder = utils.grab_shape(slide, self.name)
         utils.transfer_properties(placeholder, picture)
 
-def factory(resources, sheet):
-    objs = []
-    for resource, elements in resources.iteritems():
-        for element in elements:
-            if resource == 'charts':
-                name = element
-                obj = Chart(name, sheet)
-            elif resource == 'tables':
-                name, table_range = element
-                obj = Table(name, sheet, table_range)
-            elif resource == 'labels':
-                name, text = element
-                obj = Label(name, text)
-            objs.append(obj)
-    return objs
+def _processlabel(shapename, slidetuple):
+    Label(shapename, slidetuple[1])
+
+def _processtable(shapename, slidetuple):
+    _stype, sheet, srange = slidetuple
+    Table(shapename, sheet, srange)
+
+def _processimage(shapename, slidetuple):
+    Picture(shapename, slidetuple[1])
+
+def _processchart(shapename, slidetuple):
+    _stype, sheet, _chartname = slidetuple
+    Chart(shapename, sheet)
+
+_processfunctions = {'label': _processlabel,
+                     'table': _processtable,
+                     'image': _processimage,
+                     'chart': _processchart}
+
+def _process(slidetype ,shapename, slidetuple):
+    _processfunctions[slidetype](shapename, slidetuple )
+
+def _checktype(slidetype):
+    return slidetype in _processfunctions
+
+def factory(shapename, slidetuple):
+    slidetype = slidetuple[0]
+    if _checktype(slidetype):
+        _process(slidetype, shapename, slidetuple)
+    else:
+        logging.warning("Type '%s' is not a valid type", slidetype)
+

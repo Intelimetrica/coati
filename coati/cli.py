@@ -80,7 +80,7 @@ def build(args):
     builder = SlideBuilder(args.template)
     builder.loadtemplate()
     builder.loadconfig('./config.py')
-    builder.build()
+    builder.loadresource()
 
 
 def test(args):

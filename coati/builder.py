@@ -7,7 +7,7 @@ import imp
 import codecs
 from copy import deepcopy
 from coati import excel, merge, powerpoint
-from coati.resources import Label, Chart, Table
+from coati.resources import factory
 from coati.utils import flatten
 
 def loadcode(path, name):
@@ -37,11 +37,6 @@ class SlideBuilder(object):
     def __init__(self, template_pptx, path):
         self.template_pptx = template_pptx
         self.path = path
-        self._processfunctions = {
-            'label': self._processlabel,
-            'table': self._processtable,
-            'image': self._processimage,
-            'chart': self._processchart}
 
     @property
     def pptx(self):
@@ -75,20 +70,6 @@ class SlideBuilder(object):
         module_name = fname.split('.')[0]
         return loadcode(path, module_name)
 
-    def resourcedict(self):
-        resources_module = self._attemptload('resources.py')
-        functions_module = self._attemptload('functions.py')
-
-        if not resources_module:
-            return None
-
-        resource_dict = resources_module.resources
-
-        if functions_module:
-            return filllabels(resource_dict, functions_module)
-        else:
-            return resource_dict
-
     def fillexcel(self):
         xlsx_src = os.path.join(self.path, 'slide.xlsx')
 
@@ -108,46 +89,11 @@ class SlideBuilder(object):
             self.excelapp.CutCopyMode = False
             self.xlsx.Close()
 
-    def mergeresources(self, resources):
-        if not hasattr(self, 'xlsx'):
-            return None
+    def loadresources(self):
+        return ((number, self.prepareresource(params)) for number, params in self.slidesdata)
 
-        slide = powerpoint.slide(self.pptx, 0)
-
-        if len(resources) > 0:
-            sheet = excel.sheet(self.xlsx, 0)
-            objs = factory(resources, sheet)
-            merge.resources(slide, objs)
-
-    def build(self):
-        for number, params in self.slidesdata:
-            slide = self._pptx.Slides(number)
-            self.process_slide(slide, params)
-
-    def process_slide(self, slide, params):
+    def prepareresource(self, params):
         if type(params) is not list:
             params = [params]
-
-        def process(slide, shapename, stuple):
-            stype = stuple[0]
-            self._processfunctions[stype](slide, shapename, stuple )
-
-        def checktype(stuple):
-            stype = stuple[0]
-            return stype in self._processfunctions
-
-        return [process(slide, k, d[k]) for d in params for k in d if checktype(d[k])]
-
-    def _processlabel(self, slide, shapename, stuple):
-        label = Label(shapename, stuple[1])
-        label.merge(slide)
-
-    def _processtable(self, slide, shapename, stuple):
-        pass
-
-    def _processimage(self, slide, shapename, stuple):
-        pass
-
-    def _processchart(self, slide, shapename, stuple):
-        pass
+        return (factory(key, dict_[key]) for dict_ in params for key in dict_)
 
