@@ -6,9 +6,9 @@ import os
 import imp
 import codecs
 from copy import deepcopy
-from officereports import excel, merge, powerpoint
-from officereports.resources import factory
-
+from coati import excel, merge, powerpoint
+from coati.resources import Label, Chart, Table
+from coati.utils import flatten
 
 def loadcode(path, name):
     module = imp.new_module(name)
@@ -34,8 +34,14 @@ class SlideBuilder(object):
     information for the current configuration
     of a given slide and build it into a document instance"""
 
-    def __init__(self, path):
+    def __init__(self, template_pptx, path):
+        self.template_pptx = template_pptx
         self.path = path
+        self._processfunctions = {
+            'label': self._processlabel,
+            'table': self._processtable,
+            'image': self._processimage,
+            'chart': self._processchart}
 
     @property
     def pptx(self):
@@ -46,13 +52,20 @@ class SlideBuilder(object):
     @property
     def template(self):
         if not hasattr(self, '_template'):
-            self._template = powerpoint.SlideTemplate(
-                os.path.join(self.path, 'slide.pptx'))
+            self._template = powerpoint.SlideTemplate(self.template_pptx)
         return self._template
 
     def loadtemplate(self):
         if not hasattr(self, '_pptx'):
             self._pptx = self.template.pptx_from_template()
+
+    def loadconfig(self, fname):
+        config = self._attemptload(fname)
+        if not config or not config.slides or type(config.slides) is not list:
+            self.slidesdata = []
+            return None
+        self.slidesdata = flatten(config.slides)
+        return config
 
     def _attemptload(self, fname):
         path = os.path.join(self.path, fname)
@@ -107,8 +120,36 @@ class SlideBuilder(object):
             merge.resources(slide, objs)
 
     def build(self):
-        self.fillexcel()
-        resources = self.resourcedict() or dict()
-        self.loadtemplate()
-        self.mergeresources(resources)
-        self.closexcel()
+        tslides = self._pptx.Slides()
+
+        for number, params in self.slidesdata:
+            slide = tslides.Item(number)
+            self.process_slide(slide, params)
+
+    def process_slide(self, slide, params):
+        if type(params) is not list:
+            params = [params]
+
+        def process(slide, shapename, stuple):
+            stype = stuple[0]
+            self._processfunctions[stype](slide, shapename, stuple )
+
+        def checktype(stuple):
+            stype = stuple[0]
+            return stype in self._processfunctions
+
+        return [process(slide, k, d[k]) for d in params for k in d if checktype(d[k])]
+
+    def _processlabel(self, slide, shapename, stuple):
+        label = Label(shapename, stuple[1])
+        label.merge(slide)
+
+    def _processtable(self, slide, shapename, stuple):
+        pass
+
+    def _processimage(self, slide, shapename, stuple):
+        pass
+
+    def _processchart(self, slide, shapename, stuple):
+        pass
+
