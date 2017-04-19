@@ -5,3 +5,5 @@
 *.swo
 coati/*.pyc
 .idea
+*.swp
+*.swo
