@@ -25,11 +25,6 @@ def transfer_properties(from_shape, to_shape):
     from_shape.Delete()
     to_shape.Name = name
 
-def insert_image(slide, shape_name, filename, w = 4, h = 4):
-    picture = slide.Shapes.AddPicture(filename, 1, 1, w, h)
-    placeholder = grab_shape(slide, shape_name)
-    transfer_properties(placeholder, picture)
-
 def flatten(x):
     if type(x) is list:
         return [a for i in x for a in flatten(i)]
