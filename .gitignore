@@ -1,10 +1,7 @@
 *.pyc
 *.ipynb
 .ipynb_checkpoints/*
-*.swp
 *.swo
 coati/*.pyc
 .idea
 *.swp
-*.swo
-*.pyc
