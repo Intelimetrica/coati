@@ -1,3 +1,3 @@
-from builder import *
+from builders import *
 
 slides = "_-{}-_"

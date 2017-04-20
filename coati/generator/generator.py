@@ -51,7 +51,7 @@ def generate(ppt_path):
     config_filename = path + 'config.py'
     for i, slide in enumerate(_get_slides_shapes(ppt_path)):
         slide_name = 'slide' + str(i+1)
-        slide_tuples += ('\n' + spaces if i != 0 else '') + '(' + str(i) + ' ,' + slide_name + '.build()),'
+        slide_tuples += ('\n' + spaces if i != 0 else '') + '(' + str(i) + ', ' + slide_name + '.build()),'
         filename = path + slide_name + '.py';
         generate_path(path)
         cp(template_path, filename, lambda source: insert_code(
