@@ -5,10 +5,11 @@ of traversing and working with a project.
 import os
 import imp
 import codecs
+import logging
 from copy import deepcopy
-from officereports import excel, merge, powerpoint
-from officereports.resources import factory
-
+from coati import excel, merge, powerpoint
+from coati.resources import factory
+from coati.utils import flatten
 
 def loadcode(path, name):
     module = imp.new_module(name)
@@ -34,7 +35,8 @@ class SlideBuilder(object):
     information for the current configuration
     of a given slide and build it into a document instance"""
 
-    def __init__(self, path):
+    def __init__(self, template_pptx, path):
+        self.template_pptx = template_pptx
         self.path = path
 
     @property
@@ -46,13 +48,21 @@ class SlideBuilder(object):
     @property
     def template(self):
         if not hasattr(self, '_template'):
-            self._template = powerpoint.SlideTemplate(
-                os.path.join(self.path, 'slide.pptx'))
+            self._template = powerpoint.SlideTemplate(self.template_pptx)
         return self._template
 
     def loadtemplate(self):
         if not hasattr(self, '_pptx'):
             self._pptx = self.template.pptx_from_template()
+
+    def loadconfig(self, fname):
+        config = self._attemptload(fname)
+        if not config or not config.slides or type(config.slides) is not list:
+            self.slidesdata = []
+            logging.warning("config file no valid")
+            return None
+        self.slidesdata = flatten(config.slides)
+        return config
 
     def _attemptload(self, fname):
         path = os.path.join(self.path, fname)
@@ -61,20 +71,6 @@ class SlideBuilder(object):
 
         module_name = fname.split('.')[0]
         return loadcode(path, module_name)
-
-    def resourcedict(self):
-        resources_module = self._attemptload('resources.py')
-        functions_module = self._attemptload('functions.py')
-
-        if not resources_module:
-            return None
-
-        resource_dict = resources_module.resources
-
-        if functions_module:
-            return filllabels(resource_dict, functions_module)
-        else:
-            return resource_dict
 
     def fillexcel(self):
         xlsx_src = os.path.join(self.path, 'slide.xlsx')
@@ -95,20 +91,18 @@ class SlideBuilder(object):
             self.excelapp.CutCopyMode = False
             self.xlsx.Close()
 
-    def mergeresources(self, resources):
-        if not hasattr(self, 'xlsx'):
-            return None
+    def loadresources(self):
+        return ((number, self.prepareresource(params)) for number, params in self.slidesdata)
 
-        slide = powerpoint.slide(self.pptx, 0)
+    def prepareresource(self, params):
+        if type(params) is not list:
+            params = [params]
+        return (factory(key, dict_[key]) for dict_ in params for key in dict_)
 
-        if len(resources) > 0:
-            sheet = excel.sheet(self.xlsx, 0)
-            objs = factory(resources, sheet)
-            merge.resources(slide, objs)
+    def build(self, presentationsrc):
+        def merge(number, resource):
+            resource.merge(self._pptx.Slides(number))
 
-    def build(self):
-        self.fillexcel()
-        resources = self.resourcedict() or dict()
-        self.loadtemplate()
-        self.mergeresources(resources)
-        self.closexcel()
+        return [merge(number, resource)
+                for number, slidesrc in presentationsrc
+                for resource in slidesrc if resource]
