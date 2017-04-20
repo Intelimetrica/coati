@@ -1,10 +1,19 @@
 from coati.powerpoint import open_pptx, runpowerpoint
 import os
 import logging
-import sys
+from colorlog import ColoredFormatter
 
-colors = {'pink': '\033[95m', 'blue': '\033[94m', 'green': '\033[92m', 'yellow': '\033[93m', 'red': '\033[91m'}
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%I:%M:%S')
+LOG_LEVEL = logging.DEBUG
+LOGFORMAT = "%(asctime)s - %(log_color)s%(message)s"
+logging.root.setLevel(LOG_LEVEL)
+formatter = ColoredFormatter(LOGFORMAT)
+stream = logging.StreamHandler()
+stream.setLevel(LOG_LEVEL)
+stream.setFormatter(formatter)
+log = logging.getLogger('pythonConfig')
+log.setLevel(LOG_LEVEL)
+log.addHandler(stream)
+
 
 path = 'builders/'
 template_path = 'coati/generator/slide_template.py'
@@ -13,7 +22,7 @@ config_template_path = 'coati/generator/config_template.py'
 def _get_slides_shapes(ppt_path):
     pptapp = runpowerpoint()
     pptFile = open_pptx(pptapp, ppt_path)
-    logging.info(colors['blue'] + 'Template opened successfully')
+    log.debug('Template opened successfully')
 
     all_slide_shapes = []
     for slide in pptFile.Slides:
@@ -22,7 +31,7 @@ def _get_slides_shapes(ppt_path):
 
     pptFile.close()
     pptapp.Quit()
-    logging.info(colors['blue'] + 'Finished reading template')
+    log.debug('Finished reading template')
 
     return all_slide_shapes
 
@@ -66,11 +75,11 @@ def generate(ppt_path):
             str(slide).replace(", ",",\n" + spaces),
             '"_-{}-_"'))
         if i == 0:
-            logging.info(colors['pink'] + 'created folder %s', path)
-        logging.info(colors['green'] + 'created %s', filename)
+            log.warn('created folder %s', path)
+        log.info('created %s', filename)
 
     cp(config_template_path, config_filename, lambda source: insert_code(
         source,
         (slide_tuples[:-1] + ']'),
         '"_-{}-_"'))
-    logging.info(colors['green'] + 'created %s', config_filename)
+    log.info('created %s', config_filename)
