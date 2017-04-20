@@ -1,9 +1,9 @@
 from __future__ import print_function
 import tempfile
 import os
-from officereports import excel, powerpoint
-import officereports.constants as xlcharts
-from officereports.settings import load
+from coati import excel, powerpoint
+import coati.constants as xlcharts
+from coati.settings import load
 
 def transpose(lst):
     return [[item] for item in lst]
