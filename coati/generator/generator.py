@@ -3,7 +3,8 @@ import os
 import logging
 import sys
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - \033[92m%(message)s', datefmt='%I:%M:%S')
+colors = {'pink': '\033[95m', 'blue': '\033[94m', 'green': '\033[92m', 'yellow': '\033[93m', 'red': '\033[91m'}
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%I:%M:%S')
 
 path = 'builders/'
 template_path = 'coati/generator/slide_template.py'
@@ -12,7 +13,7 @@ config_template_path = 'coati/generator/config_template.py'
 def _get_slides_shapes(ppt_path):
     pptapp = runpowerpoint()
     pptFile = open_pptx(pptapp, ppt_path)
-    logging.info('Template opened successfully')
+    logging.info(colors['blue'] + 'Template opened successfully')
 
     all_slide_shapes = []
     for slide in pptFile.Slides:
@@ -21,7 +22,7 @@ def _get_slides_shapes(ppt_path):
 
     pptFile.close()
     pptapp.Quit()
-    logging.info('Finished reading template')
+    logging.info(colors['blue'] + 'Finished reading template')
 
     return all_slide_shapes
 
@@ -64,9 +65,12 @@ def generate(ppt_path):
             source,
             str(slide).replace(", ",",\n" + spaces),
             '"_-{}-_"'))
-        logging.info('created %s', filename)
+        if i == 0:
+            logging.info(colors['pink'] + 'created folder %s', path)
+        logging.info(colors['green'] + 'created %s', filename)
 
     cp(config_template_path, config_filename, lambda source: insert_code(
         source,
         (slide_tuples[:-1] + ']'),
         '"_-{}-_"'))
+    logging.info(colors['green'] + 'created %s', config_filename)
