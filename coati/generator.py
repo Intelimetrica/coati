@@ -16,8 +16,8 @@ log.addHandler(stream)
 
 
 path = 'builders/'
-template_path = 'coati/generator/slide_template.py'
-config_template_path = 'coati/generator/config_template.py'
+template_path = 'templates/slide_template.py'
+config_template_path = 'templates/generator/config_template.py'
 
 def _get_slides_shapes(ppt_path):
     pptapp = runpowerpoint()

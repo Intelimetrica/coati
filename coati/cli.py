@@ -6,6 +6,7 @@ from tempfile import mkstemp
 from coati.powerpoint import SlideshowJoiner, SlideSourceOrdering
 from coati.builder import SlideBuilder
 from coati.errors import CLIException
+from coati.generator import generate
 
 
 def createparser():
@@ -40,9 +41,16 @@ def createparser():
 
     # generate command
     generate_parser = subparsers.add_parser(
-        'scaffold', help='Scaffold a project')
+        'new', help='Scaffold a new project ')
+    generate_parser.set_defaults(func=generate_boilerplate)
+    generate_parser.add_argument('--path', type=str, help='path of pptx file')
 
     return parser
+
+
+def generate_boilerplate(args):
+    generate(args.path)
+    #print(args)
 
 
 def slidepaths(path):
