@@ -5,12 +5,14 @@ import logging
 
 class Chart(object):
 
-    def __init__(self, name, sheet):
+    def __init__(self, name, sheet, chartname):
+        self.chartname = chartname
         self.name = name
         self.sheet = sheet
 
     def merge(self, slide):
-        xlsx_chart = self.sheet.ChartObjects(self.name)
+        slide.Select()
+        xlsx_chart = self.sheet.ChartObjects(self.chartname)
         copy(xlsx_chart)
 
         ppt_chart = utils.grab_shape(slide, self.name)
@@ -21,7 +23,7 @@ class Chart(object):
         slide.Shapes.Paste()
         time.sleep(0.1)
 
-        new_chart = slide.Shapes(self.name)
+        new_chart = slide.Shapes(self.chartname)
         utils.apply_styles(new_chart, chart_styles)
 
 
@@ -33,6 +35,7 @@ class Table(object):
         self.table_range = table_range
 
     def merge(self, slide):
+        slide.Select()
         table_shape = utils.grab_shape(slide, self.name)
         styles = utils.grab_styles(table_shape)
         table_shape.Delete()
@@ -57,6 +60,7 @@ class Label(object):
         self.content = content
 
     def merge(self, slide):
+        slide.Select()
         ppt_label = utils.grab_shape(slide, self.name)
         utils.replace_text(ppt_label, self.content)
 
@@ -67,40 +71,63 @@ class Picture(object):
         self.path = path
 
     def merge(self, slide):
+        slide.Select()
         width, height = (1, 1)
         picture = slide.Shapes.AddPicture(self.path, 1, 1, width, height)
         placeholder = utils.grab_shape(slide, self.name)
         utils.transfer_properties(placeholder, picture)
 
-def _processlabel(shapename, slidetuple):
-    return Label(shapename, slidetuple[1])
+class Factory(object):
+    def __init__(self):
+        self._workbooks = []
+        self._excel = excel.runexcel()
+        self._processfunctions = {'label': self._processlabel,
+                                  'table': self._processtable,
+                                  'image': self._processimage,
+                                  'chart': self._processchart}
 
-def _processtable(shapename, slidetuple):
-    _stype, sheet, srange = slidetuple
-    return Table(shapename, sheet, srange)
+    def _getworkbook(self, sheetpath):
+        workbook = self._findworkbooks(sheetpath)
+        if not workbook:
+            workbook = excel.open_xlsx(self._excel, sheetpath)
+            self._workbooks.append((sheetpath, workbook))
+        return workbook
 
-def _processimage(shapename, slidetuple):
-    return Picture(shapename, slidetuple[1])
+    def _processlabel(self, shapename, slidetuple):
+        return Label(shapename, slidetuple[1])
 
-def _processchart(shapename, slidetuple):
-    _stype, sheet, _chartname = slidetuple
-    return Chart(shapename, sheet)
+    def _processtable(self, shapename, slidetuple):
+        _stype, sheetpath, srange = slidetuple
+        workbook = self._getworkbook(sheetpath)
+        sheet = excel.sheet(workbook, 0)
+        return Table(shapename, sheet, srange)
 
-_processfunctions = {'label': _processlabel,
-                     'table': _processtable,
-                     'image': _processimage,
-                     'chart': _processchart}
+    def _processimage(self, shapename, slidetuple):
+        return Picture(shapename, slidetuple[1])
 
-def _process(slidetype ,shapename, slidetuple):
-    return _processfunctions[slidetype](shapename, slidetuple )
+    def _processchart(self, shapename, slidetuple):
+        _stype, sheetpath, chartname = slidetuple
+        workbook = self._getworkbook(sheetpath)
+        sheet = excel.sheet(workbook, 0)
+        return Chart(shapename, sheet, chartname)
 
-def _checktype(slidetype):
-    return slidetype in _processfunctions
+    def _process(self, slidetype ,shapename, slidetuple):
+        return self._processfunctions[slidetype](shapename, slidetuple)
 
-def factory(shapename, slidetuple):
-    slidetype = slidetuple[0]
-    if _checktype(slidetype):
-        return _process(slidetype, shapename, slidetuple)
-    else:
-        logging.warning("Type '%s' is not a valid type", slidetype)
+    def _checktype(self, slidetype):
+        return slidetype in self._processfunctions
+
+    def prepare(self, shapename, slidetuple):
+        slidetype = slidetuple[0]
+        if self._checktype(slidetype):
+            return self._process(slidetype, shapename, slidetuple)
+        else:
+            logging.warning("Type '%s' is not a valid type", slidetype)
+
+    def close(self):
+        return [workbook.Close() for (_doc, workbook) in self._workbooks]
+
+    def _findworkbooks(self, fname):
+        l = [workbook for doc, workbook in self._workbooks if doc is fname]
+        return l[0] if len(l) > 0 else None
 
