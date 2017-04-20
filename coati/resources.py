@@ -23,7 +23,7 @@ class Chart(object):
         slide.Shapes.Paste()
         time.sleep(0.1)
 
-        new_chart = slide.Shapes(self.name)
+        new_chart = slide.Shapes(self.chartname)
         utils.apply_styles(new_chart, chart_styles)
 
 

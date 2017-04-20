@@ -79,9 +79,10 @@ def singleslide(args):
 def build(args):
     builder = SlideBuilder(args.template)
     builder.loadtemplate()
-    builder.loadconfig('./config.py')
-    builder.loadresource()
-
+    builder.loadconfig('config.py')
+    resources = builder.loadresources()
+    builder.build(resources)
+    builder.finish()
 
 def test(args):
     path = os.path.join(os.path.abspath(args.dir),

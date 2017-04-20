@@ -10,6 +10,7 @@ from copy import deepcopy
 from coati import excel, merge, powerpoint
 from coati.resources import Factory
 from coati.utils import flatten
+import time
 
 def loadcode(path, name):
     module = imp.new_module(name)
@@ -85,12 +86,19 @@ class SlideBuilder(object):
 
     def loadresources(self):
         self.factory.close()
-        return ((number, self.prepareresource(params)) for number, params in self.slidesdata)
+        return flatten([self.prepareresource(number, params) for number, params in self.slidesdata])
 
-    def prepareresource(self, params):
+    def prepareresource(self, number, params):
         if type(params) is not list:
             params = [params]
-        return (self.factory.prepare(key, dict_[key]) for dict_ in params for key in dict_)
+        def prepare(k, v):
+            return self.factory.prepare(k, v[k])
+        list_ = []
+        for param in params:
+            resources = [prepare(key, param) for key in param]
+            list_.append((number, resources))
+        return list_
+        #return [(number, [prepare(key, param[key]) for key in param]) for param in params]
 
     def build(self, presentationsrc):
         def insert(templateidx, targetidx):
@@ -99,14 +107,16 @@ class SlideBuilder(object):
             self.target.Slides.Paste(targetidx)
             slide = self.target.Slides(targetidx)
             slide.Design = template.Design
+            time.sleep(0.1)
             return slide
 
         index = 1
         for number, slidesrc in presentationsrc:
             slide = insert(number, index)
-            print index, number
             index += 1
             for resource in slidesrc:
                 if resource:
                     resource.merge(slide)
+    def finish(self):
+        self.target.Save()
 
