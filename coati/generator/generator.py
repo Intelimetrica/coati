@@ -1,4 +1,4 @@
-import win32com.client as w32
+from coati.powerpoint import open_pptx, runpowerpoint
 import os
 
 path = 'builders/'
@@ -6,8 +6,8 @@ template_path = 'generator/slide_template.py'
 config_template_path = 'generator/config_template.py'
 
 def _get_slides_shapes(ppt_path):
-    pptApp = w32.Dispatch('PowerPoint.Application')
-    pptFile = pptApp.Presentations.Open(ppt_path)
+    pptapp = runpowerpoint()
+    pptFile = open_pptx(pptapp, ppt_path)
 
     all_slide_shapes = []
     for slide in pptFile.Slides:
@@ -15,7 +15,7 @@ def _get_slides_shapes(ppt_path):
         all_slide_shapes.append(shapes_in_slide)
 
     pptFile.close()
-    pptApp.Quit()
+    pptapp.Quit()
 
     return all_slide_shapes
 
