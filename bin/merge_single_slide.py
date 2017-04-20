@@ -2,7 +2,7 @@
 from __future__ import print_function
 import os
 import sys
-from officereports.builder import SlideBuilder
+from coati.builder import SlideBuilder
 
 
 def main():
