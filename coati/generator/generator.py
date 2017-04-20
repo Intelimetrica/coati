@@ -1,13 +1,18 @@
 from coati.powerpoint import open_pptx, runpowerpoint
 import os
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - \033[92m%(message)s', datefmt='%I:%M:%S')
 
 path = 'builders/'
-template_path = 'generator/slide_template.py'
-config_template_path = 'generator/config_template.py'
+template_path = 'coati/generator/slide_template.py'
+config_template_path = 'coati/generator/config_template.py'
 
 def _get_slides_shapes(ppt_path):
     pptapp = runpowerpoint()
     pptFile = open_pptx(pptapp, ppt_path)
+    logging.info('Template opened successfully')
 
     all_slide_shapes = []
     for slide in pptFile.Slides:
@@ -16,6 +21,7 @@ def _get_slides_shapes(ppt_path):
 
     pptFile.close()
     pptapp.Quit()
+    logging.info('Finished reading template')
 
     return all_slide_shapes
 
@@ -58,6 +64,7 @@ def generate(ppt_path):
             source,
             str(slide).replace(", ",",\n" + spaces),
             '"_-{}-_"'))
+        logging.info('created %s', filename)
 
     cp(config_template_path, config_filename, lambda source: insert_code(
         source,
