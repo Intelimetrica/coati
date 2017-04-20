@@ -46,8 +46,6 @@ class Table(object):
         execute_commandbar(slide, "PasteSourceFormatting")
 
         new_names = set(shape.Name for shape in slide.Shapes)
-        print previous_names
-        print new_names
         new_table = utils.grab_shape(
             slide, list(new_names - previous_names)[0])
         new_table.Name = self.name

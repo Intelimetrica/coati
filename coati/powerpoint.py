@@ -13,8 +13,6 @@ def new(app, filename):
     return presentation
 
 def addslide(pptx, idx, style):
-    print idx
-    print style
     return pptx.Slides.AddSlide(idx, style)
 
 def open_pptx(app, path):
