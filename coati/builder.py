@@ -99,3 +99,10 @@ class SlideBuilder(object):
             params = [params]
         return (factory(key, dict_[key]) for dict_ in params for key in dict_)
 
+    def build(self, presentationsrc):
+        def merge(number, resource):
+            resource.merge(self._pptx.Slides(number))
+
+        return [merge(number, resource)
+                for number, slidesrc in presentationsrc
+                for resource in slidesrc if resource]

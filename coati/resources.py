@@ -73,18 +73,18 @@ class Picture(object):
         utils.transfer_properties(placeholder, picture)
 
 def _processlabel(shapename, slidetuple):
-    Label(shapename, slidetuple[1])
+    return Label(shapename, slidetuple[1])
 
 def _processtable(shapename, slidetuple):
     _stype, sheet, srange = slidetuple
-    Table(shapename, sheet, srange)
+    return Table(shapename, sheet, srange)
 
 def _processimage(shapename, slidetuple):
-    Picture(shapename, slidetuple[1])
+    return Picture(shapename, slidetuple[1])
 
 def _processchart(shapename, slidetuple):
     _stype, sheet, _chartname = slidetuple
-    Chart(shapename, sheet)
+    return Chart(shapename, sheet)
 
 _processfunctions = {'label': _processlabel,
                      'table': _processtable,
@@ -92,7 +92,7 @@ _processfunctions = {'label': _processlabel,
                      'chart': _processchart}
 
 def _process(slidetype ,shapename, slidetuple):
-    _processfunctions[slidetype](shapename, slidetuple )
+    return _processfunctions[slidetype](shapename, slidetuple )
 
 def _checktype(slidetype):
     return slidetype in _processfunctions
@@ -100,7 +100,7 @@ def _checktype(slidetype):
 def factory(shapename, slidetuple):
     slidetype = slidetuple[0]
     if _checktype(slidetype):
-        _process(slidetype, shapename, slidetuple)
+        return _process(slidetype, shapename, slidetuple)
     else:
         logging.warning("Type '%s' is not a valid type", slidetype)
 
