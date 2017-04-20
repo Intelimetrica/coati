@@ -8,7 +8,7 @@ import codecs
 import logging
 from copy import deepcopy
 from coati import excel, merge, powerpoint
-from coati.resources import factory
+from coati.resources import Factory
 from coati.utils import flatten
 
 def loadcode(path, name):
@@ -35,9 +35,20 @@ class SlideBuilder(object):
     information for the current configuration
     of a given slide and build it into a document instance"""
 
-    def __init__(self, template_pptx, path):
+    def __init__(self, template_pptx, path, output):
         self.template_pptx = template_pptx
         self.path = path
+        self.factory = Factory()
+        self.slidesdata = []
+        self.output = output
+
+    @property
+    def target(self):
+        if not hasattr(self, '_target'):
+            output = os.path.join(self.path, self.output)
+            self._target = powerpoint.new(self.template.app,
+                                          output)
+        return self._target
 
     @property
     def pptx(self):
@@ -53,7 +64,7 @@ class SlideBuilder(object):
 
     def loadtemplate(self):
         if not hasattr(self, '_pptx'):
-            self._pptx = self.template.pptx_from_template()
+            self._pptx = self.template.open_pptx()
 
     def loadconfig(self, fname):
         config = self._attemptload(fname)
@@ -72,37 +83,30 @@ class SlideBuilder(object):
         module_name = fname.split('.')[0]
         return loadcode(path, module_name)
 
-    def fillexcel(self):
-        xlsx_src = os.path.join(self.path, 'slide.xlsx')
-
-        if not os.path.isfile(xlsx_src):
-            return None
-
-        self.excelapp = excel.runexcel()
-        self.xlsx = excel.open_xlsx(self.excelapp, xlsx_src)
-
-        fillmodule = self._attemptload('fill.py')
-
-        if fillmodule:
-            fillmodule.fill(self.xlsx)
-
-    def closexcel(self):
-        if hasattr(self, 'xlsx'):
-            self.excelapp.CutCopyMode = False
-            self.xlsx.Close()
-
     def loadresources(self):
+        self.factory.close()
         return ((number, self.prepareresource(params)) for number, params in self.slidesdata)
 
     def prepareresource(self, params):
         if type(params) is not list:
             params = [params]
-        return (factory(key, dict_[key]) for dict_ in params for key in dict_)
+        return (self.factory.prepare(key, dict_[key]) for dict_ in params for key in dict_)
 
     def build(self, presentationsrc):
-        def merge(number, resource):
-            resource.merge(self._pptx.Slides(number))
+        def insert(templateidx, targetidx):
+            template = self._pptx.Slides(templateidx)
+            template.Copy()
+            self.target.Slides.Paste(targetidx)
+            slide = self.target.Slides(targetidx)
+            slide.Design = template.Design
+            return slide
 
-        return [merge(number, resource)
-                for number, slidesrc in presentationsrc
-                for resource in slidesrc if resource]
+        index = 1
+        for number, slidesrc in presentationsrc:
+            slide = insert(number, index)
+            print index, number
+            index += 1
+            for resource in slidesrc:
+                if resource:
+                    resource.merge(slide)
+
