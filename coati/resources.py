@@ -115,7 +115,6 @@ class Factory(object):
             name = name.group(0)[:-1]
         else:
             name = 1
-        print name
         sheet = excel.sheet(workbook, name)
         return Table(shapename, sheet, srange)
 
