@@ -4,9 +4,9 @@ from setuptools import setup, find_packages
 
 DESCRIPTION = "A tool for programmatically generating PowerPoint reports."
 LONG_DESCRIPTION = """
-**coati** is a tool that provide a fast simple and highly customizable  way to programmatically 
-create PowerPoint presentations. 
-coati works using a base PowerPoint template and can replicate and fill the slices with the desire
+**coati** is a tool that provides a fast, simple and highly customizable  way to programmatically 
+generate PowerPoint presentations. 
+coati works using a base PowerPoint template and can replicate and fill the slides with the desire
 information. 
 
 Currently coati supports four types of inputs:
