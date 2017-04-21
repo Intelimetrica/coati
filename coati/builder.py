@@ -36,7 +36,7 @@ class SlideBuilder(object):
     information for the current configuration
     of a given slide and build it into a document instance"""
 
-    def __init__(self, template_pptx, path, output):
+    def __init__(self, path, template_pptx ,output):
         self.template_pptx = template_pptx
         self.path = path
         self.factory = Factory()
@@ -60,7 +60,8 @@ class SlideBuilder(object):
     @property
     def template(self):
         if not hasattr(self, '_template'):
-            self._template = powerpoint.SlideTemplate(self.template_pptx)
+            filename = os.path.join(self.path, self.template_pptx)
+            self._template = powerpoint.SlideTemplate(filename)
         return self._template
 
     def loadtemplate(self):
@@ -117,6 +118,12 @@ class SlideBuilder(object):
             for resource in slidesrc:
                 if resource:
                     resource.merge(slide)
-    def finish(self):
+
+    def finish(self, close= False):
         self.target.Save()
+        if close:
+            self.factory.close()
+            self._pptx.Close()
+            self.target.Close()
+
 

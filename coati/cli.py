@@ -3,7 +3,6 @@ the application executable."""
 import argparse
 import os
 from tempfile import mkstemp
-from coati.powerpoint import SlideshowJoiner, SlideSourceOrdering
 from coati.builder import SlideBuilder
 from coati.errors import CLIException
 
@@ -28,6 +27,8 @@ def createparser():
                               help='Name/path of the final built presentation')
     build_parser.add_argument('-c', '--close', action='store_true',
                               help='Close powerpoint after creation')
+    build_parser.add_argument('-i', '--input', default='template.pptx',
+                              help='Input template to be processed')
 
     # test command
     test_parser = subparsers.add_parser(
@@ -44,12 +45,6 @@ def createparser():
 
     return parser
 
-
-def slidepaths(path):
-    directory = os.path.abspath(path)
-    ordering = SlideSourceOrdering()
-    return ordering(os.path.join(directory, slideshow)
-                    for slideshow in os.listdir(directory))
 
 
 def destinationpath(args):
@@ -75,23 +70,15 @@ def singleslide(args):
         builder.template.clean()
         builder.template.app.Quit()
 
+def test(args):
+    pass
 
 def build(args):
-    builder = SlideBuilder(args.template)
+    builder = SlideBuilder(args.dir, args.input, args.output)
     builder.loadtemplate()
     builder.loadconfig('config.py')
     resources = builder.loadresources()
     builder.build(resources)
-    builder.finish()
-
-def test(args):
-    path = os.path.join(os.path.abspath(args.dir),
-                        args.target)
-    builder = SlideBuilder(path)
-    builder.fillexcel()
+    builder.finish(close= args.close)
 
 
-def close_excel(builder):
-    if hasattr(builder, 'excelapp'):
-        builder.excelapp.DisplayAlerts = False
-        builder.excelapp.Quit()
