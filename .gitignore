@@ -6,3 +6,4 @@ coati/*.pyc
 .idea
 *.swp
 *.pptx
+*.DS_Store

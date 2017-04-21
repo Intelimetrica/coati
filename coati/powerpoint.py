@@ -7,6 +7,13 @@ from win32 import run
 
 runpowerpoint = lambda: run('PowerPoint.Application')
 
+def new(app, filename):
+    presentation = app.Presentations.Add()
+    presentation.SaveAs(filename)
+    return presentation
+
+def addslide(pptx, idx, style):
+    return pptx.Slides.AddSlide(idx, style)
 
 def open_pptx(app, path):
     return app.Presentations.Open(path)
@@ -29,6 +36,10 @@ class SlideTemplate(object):
         tmp_fd, tmp_path = tempfile.mkstemp(prefix='pptxtmp')
         shutil.copyfile(self.template_path, tmp_path)
         self.pptx = open_pptx(self.app, tmp_path)
+        return self.pptx
+
+    def open_pptx(self):
+        self.pptx = open_pptx(self.app, self.template_path)
         return self.pptx
 
     @property
