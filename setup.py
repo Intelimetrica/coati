@@ -43,13 +43,6 @@ setup(
         'Programming Language :: Python :: 2.7',
     ],
     keywords="PowerPoint, automatic reports",
-    packages=['pywin32', 'colorlog==2.10.0'],
+    packages=find_packages(exclude=['pywin32', 'ipython', 'ipython-genutil', 'psycopg2']),
     zip_safe=False,
-
-    # To provide executable scripts, use entry points in preference to the
-    # "scripts" keyword. Entry points provide cross-platform support and allow
-    # pip to create the appropriate form of executable for the target platform.
-    entry_points={
-        'console_scripts': ['coati = coati.test:test_cmd'],
-    },
 )
