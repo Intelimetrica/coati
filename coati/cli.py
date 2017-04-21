@@ -61,13 +61,6 @@ def generate_boilerplate(args):
     generate(args.project_name, args.path)
 
 
-def slidepaths(path):
-    directory = os.path.abspath(path)
-    ordering = SlideSourceOrdering()
-    return ordering(os.path.join(directory, slideshow)
-                    for slideshow in os.listdir(directory))
-
-
 def destinationpath(args):
     if args.temporal:
         fs, path = mkstemp()
