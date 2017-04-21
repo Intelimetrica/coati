@@ -36,9 +36,7 @@ def _get_slides_shapes(ppt_path):
     return all_slide_shapes
 
 def _get_shapes_in_slide(slide):
-    shapes_in_slide = {}
-    for each_shape in slide.shapes:
-        shapes_in_slide.update({each_shape.name: ()})
+    shapes_in_slide = {each_shape.name: () for each_shape in slide.shapes}
     return shapes_in_slide
 
 def _generate_path(p):
@@ -104,4 +102,3 @@ def generate(project_name, ppt_path):
     copy_ppt = path + '/' + str(os.path.split(ppt_path)[-1])
     _cp(ppt_path, copy_ppt  , lambda source: source)
     log.info('copy %s', copy_ppt)
-
