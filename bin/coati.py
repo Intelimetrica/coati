@@ -3,8 +3,8 @@
 from __future__ import print_function
 import sys
 import traceback
-from officereports import cli
-from officereports.errors import CoatiException
+from coati import cli
+from coati.errors import CoatiException
 
 
 def main():
