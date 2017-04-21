@@ -4,9 +4,9 @@ import os
 import sys
 from tempfile import mkstemp
 from glob import glob
-from officereports.settings import load
-from officereports.powerpoint import SlideshowJoiner, SlideSourceOrdering
-from officereports.builder import SlideBuilder
+from coati.settings import load
+from coati.powerpoint import SlideshowJoiner, SlideSourceOrdering
+from coati.builder import SlideBuilder
 
 def slide_paths():
     directory = os.path.abspath('sources')
