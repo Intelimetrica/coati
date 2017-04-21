@@ -2,8 +2,16 @@ from coati.win32 import copy, execute_commandbar
 from coati import utils, excel, powerpoint
 import time
 import logging
+import abc
 
-class Chart(object):
+class AbstractResource():
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def merge(self, slide):
+        pass
+
+class Chart(AbstractResource):
 
     def __init__(self, name, sheet, chartname):
         self.chartname = chartname
@@ -27,7 +35,7 @@ class Chart(object):
         utils.apply_styles(new_chart, chart_styles)
 
 
-class Table(object):
+class Table(AbstractResource):
 
     def __init__(self, name, sheet, table_range):
         self.name = name
@@ -53,7 +61,7 @@ class Table(object):
         utils.apply_styles(new_table, styles)
 
 
-class Label(object):
+class Label(AbstractResource):
 
     def __init__(self, name, content):
         self.name = name
@@ -64,7 +72,7 @@ class Label(object):
         ppt_label = utils.grab_shape(slide, self.name)
         utils.replace_text(ppt_label, self.content)
 
-class Picture(object):
+class Picture(AbstractResource):
 
     def __init__(self, name, path):
         self.name = name
