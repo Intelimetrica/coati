@@ -50,7 +50,6 @@ def createparser():
 
 def generate_boilerplate(args):
     generate(args.path)
-    #print(args)
 
 
 def slidepaths(path):
