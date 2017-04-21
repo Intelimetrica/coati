@@ -3,7 +3,6 @@ the application executable."""
 import argparse
 import os
 from tempfile import mkstemp
-from coati.powerpoint import SlideshowJoiner, SlideSourceOrdering
 from coati.builder import SlideBuilder
 from coati.errors import CLIException
 
@@ -28,15 +27,23 @@ def createparser():
                               help='Name/path of the final built presentation')
     build_parser.add_argument('-c', '--close', action='store_true',
                               help='Close powerpoint after creation')
+    build_parser.add_argument('-i', '--input', default='template.pptx',
+                              help='Input template to be processed')
 
-    # test command
-    test_parser = subparsers.add_parser(
-        'test', help='Test output of data functions without slides')
-    test_parser.set_defaults(func=test)
-    test_parser.add_argument('-d', '--dir', default=os.getcwd(),
-                             help='The directory where the project lives')
-    test_parser.add_argument('target',
-                             help='The name of the slide to be tested')
+    # singleslide command
+    singleslide_parser = subparsers.add_parser(
+        'singleslide', help='Run coati on only one slide')
+    singleslide_parser.set_defaults(func=singleslide)
+    singleslide_parser.add_argument('-d', '--dir', default=os.getcwd(),
+                                    help='The directory where the project lives')
+    singleslide_parser.add_argument('-t', '--temporal', action='store_true',
+                                    help='Output to a temporal file')
+    singleslide_parser.add_argument('-o', '--output', default=os.path.abspath('out.pptx'),
+                                    help='Name/path of the final built presentation')
+    singleslide_parser.add_argument('-i', '--input', default='template.pptx',
+                                    help='Input template to be processed')
+    singleslide_parser.add_argument('-n', '--number', default='0',
+                                    help='Number of slide to process')
 
     # generate command
     generate_parser = subparsers.add_parser(
@@ -44,12 +51,6 @@ def createparser():
 
     return parser
 
-
-def slidepaths(path):
-    directory = os.path.abspath(path)
-    ordering = SlideSourceOrdering()
-    return ordering(os.path.join(directory, slideshow)
-                    for slideshow in os.listdir(directory))
 
 
 def destinationpath(args):
@@ -61,37 +62,23 @@ def destinationpath(args):
 
 
 def singleslide(args):
-    path = os.path.abspath(args.dir)
-    fullpath = os.path.join(path, args.single)
 
-    if not os.path.isdir(fullpath):
-        raise CLIException("'%s' is not present in project" % args.single)
+    builder = SlideBuilder(args.dir, args.input, args.output)
+    builder.loadtemplate()
+    builder.loadconfig('config.py')
+    resources = builder.loadresources(slide=int(args.number))
+    builder.build(resources)
+    builder.finish(close= False)
 
-    builder = SlideBuilder(fullpath)
-    builder.build()
-    close_excel(builder)
-
-    if args.close:
-        builder.template.clean()
-        builder.template.app.Quit()
-
+def test(args):
+    pass
 
 def build(args):
-    builder = SlideBuilder(args.template)
+    builder = SlideBuilder(args.dir, args.input, args.output)
     builder.loadtemplate()
     builder.loadconfig('config.py')
     resources = builder.loadresources()
     builder.build(resources)
-    builder.finish()
-
-def test(args):
-    path = os.path.join(os.path.abspath(args.dir),
-                        args.target)
-    builder = SlideBuilder(path)
-    builder.fillexcel()
+    builder.finish(close= args.close)
 
 
-def close_excel(builder):
-    if hasattr(builder, 'excelapp'):
-        builder.excelapp.DisplayAlerts = False
-        builder.excelapp.Quit()
