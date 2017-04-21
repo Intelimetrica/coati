@@ -2,6 +2,7 @@ from coati.win32 import copy, execute_commandbar
 from coati import utils, excel, powerpoint
 import time
 import logging
+import re
 
 class Chart(object):
 
@@ -40,6 +41,7 @@ class Table(object):
         styles = utils.grab_styles(table_shape)
         table_shape.Delete()
 
+        self.sheet.Select()
         previous_names = set(shape.Name for shape in slide.Shapes)
         copy(self.sheet.Range(self.table_range))
 
@@ -99,7 +101,13 @@ class Factory(object):
     def _processtable(self, shapename, slidetuple):
         _stype, sheetpath, srange = slidetuple
         workbook = self._getworkbook(sheetpath)
-        sheet = excel.sheet(workbook, 0)
+        name = re.search('^(.+?)!', srange)
+        if name:
+            name = name.group(0)[:-1]
+        else:
+            name = 1
+        print name
+        sheet = excel.sheet(workbook, name)
         return Table(shapename, sheet, srange)
 
     def _processimage(self, shapename, slidetuple):
@@ -108,7 +116,7 @@ class Factory(object):
     def _processchart(self, shapename, slidetuple):
         _stype, sheetpath, chartname = slidetuple
         workbook = self._getworkbook(sheetpath)
-        sheet = excel.sheet(workbook, 0)
+        sheet = excel.sheet(workbook, 1)
         return Chart(shapename, sheet, chartname)
 
     def _process(self, slidetype ,shapename, slidetuple):
