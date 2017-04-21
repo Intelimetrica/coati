@@ -10,7 +10,7 @@ def open_xlsx(app, path):
 
 
 def sheet(xlsx, index):
-    return xlsx.Sheets(index + 1)
+    return xlsx.Sheets.Item(index)
 
 
 def chart(sheet, reference):
