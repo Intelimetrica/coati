@@ -43,13 +43,15 @@ def createparser():
     generate_parser = subparsers.add_parser(
         'new', help='Scaffold a new project ')
     generate_parser.set_defaults(func=generate_boilerplate)
-    generate_parser.add_argument('--path', type=str, help='path of pptx file')
+    generate_parser.add_argument('project_name', metavar='N', type=str,
+                        help='A string indicating the new project name')
+    generate_parser.add_argument('-p','--path', type=str, help='path of pptx file')
 
     return parser
 
 
 def generate_boilerplate(args):
-    generate(args.path)
+    generate(args.project_name, args.path)
 
 
 def slidepaths(path):
