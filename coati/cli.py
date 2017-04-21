@@ -5,6 +5,7 @@ import os
 from tempfile import mkstemp
 from coati.builder import SlideBuilder
 from coati.errors import CLIException
+from coati.generator import generate
 
 
 def createparser():
@@ -47,10 +48,17 @@ def createparser():
 
     # generate command
     generate_parser = subparsers.add_parser(
-        'scaffold', help='Scaffold a project')
+        'new', help='Scaffold a new project ')
+    generate_parser.set_defaults(func=generate_boilerplate)
+    generate_parser.add_argument('project_name', metavar='N', type=str,
+                        help='A string indicating the new project name')
+    generate_parser.add_argument('-p','--path', type=str, help='path of pptx file')
 
     return parser
 
+
+def generate_boilerplate(args):
+    generate(args.project_name, args.path)
 
 
 def destinationpath(args):

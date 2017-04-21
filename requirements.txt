@@ -10,3 +10,4 @@ python-dotenv==0.4.0
 pywin32==220
 simplegeneric==0.8.1
 traitlets==4.2.1
+colorlog==2.10.0

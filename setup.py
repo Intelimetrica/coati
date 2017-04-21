@@ -4,17 +4,17 @@ from setuptools import setup, find_packages
 
 DESCRIPTION = "A tool for programmatically generating PowerPoint reports."
 LONG_DESCRIPTION = """
-**coati** is a tool that provides a fast, simple and highly customizable  way to programmatically 
-generate PowerPoint presentations. 
+**coati** is a tool that provides a fast, simple and highly customizable  way to programmatically
+generate PowerPoint presentations.
 coati works using a base PowerPoint template and can replicate and fill the slides with the desire
-information. 
+information.
 
 Currently coati supports four types of inputs:
 
  - Excel charts
  - Images (png, svg, jpg)
  - Excel tables
- - Text 
+ - Text
 """
 VERSION = "0.8.0"
 DISTNAME = "coati"
@@ -44,5 +44,9 @@ setup(
     ],
     keywords="PowerPoint, automatic reports",
     packages=find_packages(exclude=['pywin32', 'ipython', 'ipython-genutil', 'psycopg2']),
+    package_data={'coati': ['templates/*.txt']},
     zip_safe=False,
+    entry_points={
+        'console_scripts': ['coati = coati.runner:main'],
+    },
 )
