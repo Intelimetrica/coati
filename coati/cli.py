@@ -30,14 +30,20 @@ def createparser():
     build_parser.add_argument('-i', '--input', default='template.pptx',
                               help='Input template to be processed')
 
-    # test command
-    test_parser = subparsers.add_parser(
-        'test', help='Test output of data functions without slides')
-    test_parser.set_defaults(func=test)
-    test_parser.add_argument('-d', '--dir', default=os.getcwd(),
-                             help='The directory where the project lives')
-    test_parser.add_argument('target',
-                             help='The name of the slide to be tested')
+    # singleslide command
+    singleslide_parser = subparsers.add_parser(
+        'singleslide', help='Run coati on only one slide')
+    singleslide_parser.set_defaults(func=singleslide)
+    singleslide_parser.add_argument('-d', '--dir', default=os.getcwd(),
+                                    help='The directory where the project lives')
+    singleslide_parser.add_argument('-t', '--temporal', action='store_true',
+                                    help='Output to a temporal file')
+    singleslide_parser.add_argument('-o', '--output', default=os.path.abspath('out.pptx'),
+                                    help='Name/path of the final built presentation')
+    singleslide_parser.add_argument('-i', '--input', default='template.pptx',
+                                    help='Input template to be processed')
+    singleslide_parser.add_argument('-n', '--number', default='0',
+                                    help='Number of slide to process')
 
     # generate command
     generate_parser = subparsers.add_parser(
@@ -56,19 +62,13 @@ def destinationpath(args):
 
 
 def singleslide(args):
-    path = os.path.abspath(args.dir)
-    fullpath = os.path.join(path, args.single)
 
-    if not os.path.isdir(fullpath):
-        raise CLIException("'%s' is not present in project" % args.single)
-
-    builder = SlideBuilder(fullpath)
-    builder.build()
-    close_excel(builder)
-
-    if args.close:
-        builder.template.clean()
-        builder.template.app.Quit()
+    builder = SlideBuilder(args.dir, args.input, args.output)
+    builder.loadtemplate()
+    builder.loadconfig('config.py')
+    resources = builder.loadresources(slide=int(args.number))
+    builder.build(resources)
+    builder.finish(close= False)
 
 def test(args):
     pass

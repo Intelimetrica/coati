@@ -85,9 +85,17 @@ class SlideBuilder(object):
         module_name = fname.split('.')[0]
         return loadcode(path, module_name)
 
-    def loadresources(self):
-        self.factory.close()
-        return flatten([self.prepareresource(number, params) for number, params in self.slidesdata])
+    def _getslidesdata(self, slide):
+        if slide > 0:
+            return [(number, params)
+                    for number, params in self.slidesdata
+                    if number == slide]
+        else:
+            return self.slidesdata
+
+    def loadresources(self, slide=0):
+        slidesdata = self._getslidesdata(slide)
+        return flatten([self.prepareresource(number, params) for number, params in slidesdata])
 
     def prepareresource(self, number, params):
         if type(params) is not list:
