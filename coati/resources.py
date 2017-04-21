@@ -110,11 +110,7 @@ class Factory(object):
     def _processtable(self, shapename, slidetuple):
         _stype, sheetpath, srange = slidetuple
         workbook = self._getworkbook(sheetpath)
-        name = re.search('^(.+?)!', srange)
-        if name:
-            name = name.group(0)[:-1]
-        else:
-            name = 1
+        name = srange.split('!')[0] if '!' in srange else 1
         sheet = excel.sheet(workbook, name)
         return Table(shapename, sheet, srange)
 
@@ -146,4 +142,3 @@ class Factory(object):
     def _findworkbooks(self, fname):
         l = [workbook for doc, workbook in self._workbooks if doc is fname]
         return l[0] if len(l) > 0 else None
-
