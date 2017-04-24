@@ -74,7 +74,8 @@ def generate(project_name, ppt_path):
     slide_tuples = '['
 
     #Generate builders/ folder prior slides creation
-    _generate_path(os.path.join(path, 'builders/'))
+    path_builders = os.path.join(path, 'builders/')
+    _generate_path(path_builders)
     log.warn('create folder %s', "./builders/")
     for i, slide in enumerate(_get_slides_shapes(ppt_path)):
         slide_name = 'slide' + str(i+1)
