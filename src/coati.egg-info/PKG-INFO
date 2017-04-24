@@ -1,0 +1,31 @@
+Metadata-Version: 1.1
+Name: coati
+Version: 0.1.0
+Summary: A tool for programmatically generating PowerPoint reports.
+Home-page: https://github.com/Intelimetrica/coati
+Author: Intelimetrica team
+Author-email: mailrelay@intelimetrica.com
+License: MIT
+Description: 
+                **coati** is a tool that provides a fast, simple and highly customizable  way to programmatically
+                generate PowerPoint presentations.
+                coati works using a base PowerPoint template and can replicate and fill the slides with the desire
+                information.
+        
+                Currently coati supports four types of inputs:
+        
+                 - Excel charts
+                 - Images (png, svg, jpg)
+                 - Excel tables
+                 - Text
+                
+Keywords: PowerPoint, automatic reports
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Topic :: Software Development :: Build Tools
