@@ -73,20 +73,23 @@ def generate(project_name, ppt_path):
     spaces = " " * 12
     slide_tuples = '['
 
-    path_builders = os.path.join(path, 'builders/')
+    #Generate builders/ folder prior slides creation
+    _generate_path(os.path.join(path, 'builders/'))
+    log.warn('create folder %s', "./builders/")
     for i, slide in enumerate(_get_slides_shapes(ppt_path)):
         slide_name = 'slide' + str(i+1)
-        slide_tuples += ('\n' + spaces if i != 0 else '') + '(' + str(i) + ', ' + slide_name + '.build()),'
         filename = path_builders + slide_name + '.py';
-        _generate_path(path_builders)
+
+        #Create slide#.py with the template info
         _cp(template_path, filename, lambda source: _insert_code(
             source,
             str(slide).replace(", ",",\n" + spaces),
             '"_-{}-_"'))
-        if i == 0:
-            log.warn('create folder %s', path_builders)
         log.info('create %s', filename)
+        #This line is in the for loop cause is gathering info for the config.py
+        slide_tuples += ('\n' + spaces if i != 0 else '') + '(' + str(i+1) + ', ' + slide_name + '.build()),'
 
+    #Generate config.py with already gathered info in slide_tuples
     config_filename = path + '/config.py'
     _cp(config_template_path, config_filename, lambda source: _insert_code(
         source,
@@ -94,11 +97,17 @@ def generate(project_name, ppt_path):
         '"_-{}-_"'))
     log.info('create %s', config_filename)
 
+    #Create __init__ in builders
     init_file = path + '/builders/__init__.py'
     f_init = open(init_file, 'w')
     f_init.close
     log.info('create %s', init_file)
 
+    #Copy original template file
     copy_ppt = path + '/' + str(os.path.split(ppt_path)[-1])
     _cp(ppt_path, copy_ppt  , lambda source: source)
     log.info('copy %s', copy_ppt)
+
+    #Add images folder
+    _generate_path(os.path.join(path, 'images/'))
+    log.warn('create folder %s', "./images/")
