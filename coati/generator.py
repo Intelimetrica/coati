@@ -76,7 +76,7 @@ def generate(project_name, ppt_path):
     #Generate builders/ folder prior slides creation
     path_builders = os.path.join(path, 'builders/')
     _generate_path(path_builders)
-    log.warn('create folder %s', "./builders/")
+    log.info('create folder %s', "./builders/")
     for i, slide in enumerate(_get_slides_shapes(ppt_path)):
         slide_name = 'slide' + str(i+1)
         filename = path_builders + slide_name + '.py';
@@ -111,4 +111,4 @@ def generate(project_name, ppt_path):
 
     #Add images folder
     _generate_path(os.path.join(path, 'images/'))
-    log.warn('create folder %s', "./images/")
+    log.info('create folder %s', "./images/")
