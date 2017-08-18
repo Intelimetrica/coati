@@ -30,6 +30,8 @@ def createparser():
                               help='Close powerpoint after creation')
     build_parser.add_argument('-i', '--input', default='template.pptx',
                               help='Input template to be processed')
+    build_parser.add_argument('-f', '--config', default='config.py',
+                              help='Config file to be used when building (slides must be defined)')
 
     # singleslide command
     singleslide_parser = subparsers.add_parser(
@@ -45,6 +47,8 @@ def createparser():
                                     help='Input template to be processed')
     singleslide_parser.add_argument('-n', '--number', default='0',
                                     help='Number of slide to process')
+    singleslide_parser.add_argument('-f', '--config', default='config.py',
+                                    help='Config file to be used when building (slides must be defined)')
 
     # generate command
     generate_parser = subparsers.add_parser(
@@ -73,10 +77,10 @@ def singleslide(args):
 
     builder = SlideBuilder(args.dir, args.input, args.output)
     builder.loadtemplate()
-    builder.loadconfig('config.py')
+    builder.loadconfig(args.config)
     resources = builder.loadresources(slide=int(args.number))
     builder.build(resources)
-    builder.finish(close= False)
+    builder.finish(close=False)
 
 def test(args):
     pass
@@ -84,9 +88,9 @@ def test(args):
 def build(args):
     builder = SlideBuilder(args.dir, args.input, args.output)
     builder.loadtemplate()
-    builder.loadconfig('config.py')
+    builder.loadconfig(args.config)
     resources = builder.loadresources()
     builder.build(resources)
-    builder.finish(close= args.close)
+    builder.finish(close=args.close)
 
 

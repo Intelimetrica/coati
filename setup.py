@@ -16,7 +16,7 @@ Currently coati supports four types of inputs:
  - Excel tables
  - Text
 """
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 DISTNAME = "coati"
 LICENSE = "MIT"
 AUTHOR = "The Intelimetrica Team"
