@@ -30,10 +30,20 @@ class Chart(AbstractResource):
 
         ppt_chart.Delete()
 
-        slide.Shapes.Paste()
-        time.sleep(0.1)
+        previous_names = set(shape.Name for shape in slide.Shapes)
 
-        new_chart = slide.Shapes(self.chartname)
+        slide.Shapes.Paste()
+
+        for second in range(200):  # Wait up to 20 seconds, checking every 0.1 seconds
+            new_names = set(shape.Name for shape in slide.Shapes)
+            if new_names != previous_names:
+                break
+            time.sleep(0.1)
+
+        new_chart = utils.grab_shape(
+            slide, list(new_names - previous_names)[0])
+        new_chart.Name = self.name
+
         utils.apply_styles(new_chart, chart_styles)
 
 
@@ -56,7 +66,12 @@ class Table(AbstractResource):
 
         execute_commandbar(slide, "PasteSourceFormatting")
 
-        new_names = set(shape.Name for shape in slide.Shapes)
+        for second in range(200):  # Wait up to 20 seconds, checking every 0.1 seconds
+            new_names = set(shape.Name for shape in slide.Shapes)
+            if new_names != previous_names:
+                break
+            time.sleep(0.1)
+
         new_table = utils.grab_shape(
             slide, list(new_names - previous_names)[0])
         new_table.Name = self.name
@@ -84,7 +99,10 @@ class Picture(AbstractResource):
     def merge(self, slide):
         slide.Select()
         width, height = (1, 1)
-        picture = slide.Shapes.AddPicture(self.path, 1, 1, width, height)
+        try:
+            picture = slide.Shapes.AddPicture(self.path, 1, 1, width, height)
+        except:
+            picture = slide.Shapes.AddPicture(self.path.replace("/", "\\\\"), 1, 1, width, height)
         placeholder = utils.grab_shape(slide, self.name)
         utils.transfer_properties(placeholder, picture)
 
@@ -120,7 +138,9 @@ class Factory(object):
     def _processchart(self, shapename, slidetuple):
         _stype, sheetpath, chartname = slidetuple
         workbook = self._getworkbook(sheetpath)
-        sheet = excel.sheet(workbook, 1)
+        sheet_name = chartname.split('!')[0] if '!' in chartname else 1
+        chartname = chartname.split('!')[1] if '!' in chartname else chartname
+        sheet = excel.sheet(workbook, sheet_name)
         return Chart(shapename, sheet, chartname)
 
     def _process(self, slidetype ,shapename, slidetuple):
