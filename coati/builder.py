@@ -73,6 +73,8 @@ class SlideBuilder(object):
         if not config or not config.slides or type(config.slides) is not list:
             self.slidesdata = []
             logging.warning("config file no valid")
+            if not config:
+                logging.warning("config.py not found. Are you on the right directory?")
             return None
         self.slidesdata = flatten(config.slides)
         return config

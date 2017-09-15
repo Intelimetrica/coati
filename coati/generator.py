@@ -2,6 +2,7 @@ from coati.powerpoint import open_pptx, runpowerpoint
 import os
 import sys
 import logging
+from shutil import copyfile
 from colorlog import ColoredFormatter
 
 LOG_LEVEL = logging.DEBUG
@@ -18,6 +19,7 @@ log.addHandler(stream)
 this_dir = os.path.dirname(__file__)
 template_path = os.path.join(this_dir, 'templates/slide_template.txt')
 config_template_path = os.path.join(this_dir, 'templates/config_template.txt')
+init_template_path = os.path.join(this_dir, 'templates/init_template.txt')
 
 def _get_slides_shapes(ppt_path):
     pptapp = runpowerpoint()
@@ -100,8 +102,7 @@ def generate(project_name, ppt_path):
 
     #Create __init__ in builders
     init_file = path + '/builders/__init__.py'
-    f_init = open(init_file, 'w')
-    f_init.close
+    copyfile(init_template_path, init_file)
     log.info('create %s', init_file)
 
     #Copy original template file
