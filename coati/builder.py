@@ -170,5 +170,6 @@ class SlideBuilder(object):
             self.factory.close()
             self._pptx.Close()
             self.target.Close()
+            self.template.close_runpowerpoint()
 
 
