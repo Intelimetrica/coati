@@ -65,7 +65,10 @@ class SlideTemplate(object):
         self.app.DisplayAlerts = False
         self.pptx.Saved = True
         self.pptx.Close()
-
+    
+    def close_runpowerpoint(self):
+        self._app.Quit()
+        self._app = None
 
 class SlideshowJoiner(object):
     """Manages the logic for joining a set of SlideTemplate

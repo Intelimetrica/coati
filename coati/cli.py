@@ -79,7 +79,8 @@ def singleslide(args):
     builder.loadtemplate()
     builder.loadconfig(args.config)
     resources = builder.loadresources(slide=int(args.number))
-    builder.build(resources)
+    #builder.build(resources)
+    builder.buildSingleSlide(resources)
     builder.finish(close=False)
 
 def test(args):
@@ -89,8 +90,9 @@ def build(args):
     builder = SlideBuilder(args.dir, args.input, args.output)
     builder.loadtemplate()
     builder.loadconfig(args.config)
-    resources = builder.loadresources()
-    builder.build(resources)
+    #resources = builder.loadresources()     
+    #builder.build(resources)    
+    builder.build()    
     builder.finish(close=args.close)
 
 

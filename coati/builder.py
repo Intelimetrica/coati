@@ -111,7 +111,35 @@ class SlideBuilder(object):
         return list_
         #return [(number, [prepare(key, param[key]) for key in param]) for param in params]
 
-    def build(self, presentationsrc):
+    def build(self):
+        def insert(templateidx, targetidx):
+            template = self._pptx.Slides(templateidx)
+            template.Copy()
+            self.target.Slides.Paste(targetidx)
+            slide = self.target.Slides(targetidx)
+            slide.Design = template.Design
+            time.sleep(0.1)
+            return slide
+        
+        def SaveCloseWorkbook(workbook):
+            workbook.Save()
+            workbook.Close()
+
+        index = 1
+        indexWorkbook=0        
+        for number, slidedata in self.slidesdata:
+            presentationsrc = self.prepareresource(number, slidedata)           
+            for number, slidesrc in presentationsrc:            
+                slide = insert(number, index)                                   
+                for resource in slidesrc:
+                    if resource:                    
+                        resource.merge(slide)                                             
+                if self.factory._workbooks:                                                     
+                    [SaveCloseWorkbook(workbook) for (_doc, workbook) in self.factory._workbooks]                                                              
+                self.factory._workbooks[:] = []   
+            index += 1
+
+    def buildSingleSlide(self, presentationsrc):
         def insert(templateidx, targetidx):
             template = self._pptx.Slides(templateidx)
             template.Copy()
@@ -122,12 +150,19 @@ class SlideBuilder(object):
             return slide
 
         index = 1
-        for number, slidesrc in presentationsrc:
-            slide = insert(number, index)
-            index += 1
+        indexWorkbook=0
+        for number, slidesrc in presentationsrc:            
+            slide = insert(number, index)                                 
+            index += 1            
             for resource in slidesrc:
-                if resource:
+                if resource:                    
                     resource.merge(slide)
+            for resource in slidesrc:                                      
+                if hasattr(resource, 'sheet'):                                         
+                    self.factory._workbooks[indexWorkbook][1].Save()
+                    self.factory._workbooks[indexWorkbook][1].Close()
+                    indexWorkbook += 1
+                    break   
 
     def finish(self, close= False):
         self.target.Save()
@@ -135,5 +170,6 @@ class SlideBuilder(object):
             self.factory.close()
             self._pptx.Close()
             self.target.Close()
+            self.template.close_runpowerpoint()
 
 
